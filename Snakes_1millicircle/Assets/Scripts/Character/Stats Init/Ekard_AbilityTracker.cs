@@ -618,7 +618,7 @@ public class Ekard_AbilityTracker : MonoBehaviour
                 heroCombat.CallAbilityCast(0.5f);
                 heroCombat.ResetAutoAttack(false);
 
-                CreateAbility(heroClass.Q_Ability, Q_Projectile, Q_Ability_Spawn.transform.position, null, Vector3.forward, false);
+                CreateAbility(heroClass.Q_Ability, Q_Projectile, Q_Ability_Spawn.transform.position, null, Vector3.zero, false);
                 //CreateAbility(heroClass.W_Ability, W_Projectile, W_Ability_Spawn.transform.position, null, Vector3.zero, false);
                 heroClass.heroMana -= heroClass.Q_Ability.abilityCost;
 
