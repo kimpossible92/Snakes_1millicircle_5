@@ -131,6 +131,10 @@ public class Ekard_AbilityTracker : MonoBehaviour
         heroCombat = GetComponent<HeroCombat>();
         systemScript = FindObjectOfType<SystemNotificationManager_Script>();
         abilityHUDVisual = FindObjectOfType<AbilityLevelHUDVisualController_Script>();
+        foreach (var healer1 in FindObjectsOfType<healerFire>())
+        {
+            if (healer1.isMainPlayer) { GetTextCount = healer1.GetComponent<Text>(); }
+        }
 
         // Ability GetComponents
         Q_Ability_Indicator_SpriteRenderer = Q_Ability_Indicator_GameObject.GetComponent<SpriteRenderer>();
@@ -184,6 +188,8 @@ public class Ekard_AbilityTracker : MonoBehaviour
         #endregion
     }
     private bool isabilityReturn=false;
+    private int healerCount = 3;
+    [SerializeField] private Text GetTextCount;
     private void Update()
     {
         // Ability Code
@@ -191,6 +197,8 @@ public class Ekard_AbilityTracker : MonoBehaviour
         W_Ability();
         E_Ability();
         R_Ability();
+        if (E_Ability_IsReturn&&Input.GetKeyDown(KeyCode.E) && healerCount >= 1) { GetComponent<HeroClass>().setMaxHealth(); healerCount--; }
+        GetTextCount.text = healerCount.ToString();
         if (Input.GetKeyUp(KeyCode.Space))
         {
             gameObject.transform.parent.position = _space_target.position;GetComponent<CharacterMovementScript>().setSpace();
@@ -251,7 +259,9 @@ public class Ekard_AbilityTracker : MonoBehaviour
 
         #endregion
     }
-
+    //level - дизайн: лестница и лучники, узкая канализация и снова лестница открытое пространство с лучниками, пара переходов потом снова открытое пространство с лучниками
+    //лифт с подъемником
+    //пространство со скелетами или призраками неуязвимыми
     IEnumerator ResetStatValue(string StatName, float StatToReset, float StatDefaultValue, float time)
     {
         yield return new WaitForSeconds(time);
@@ -290,19 +300,37 @@ public class Ekard_AbilityTracker : MonoBehaviour
         Vector3 _abilitySpawn, GameObject targetPos, Vector3 _abilityTargetDir, bool _targeted)
     {
         //Debug.Log(_ability.abilityName + " created!");
-        GameObject _temp = Instantiate(_prefab, _abilitySpawn, Quaternion.Euler(-90, 0, 0));
-
-        Rigidbody rb = _temp.GetComponent<Rigidbody>();
-        rb.AddRelativeForce(transform.forward * _ability.abilitySpeed, ForceMode.Impulse);
-        _temp.GetComponent<ProjectileScript>().target = targetPos;
-        _temp.GetComponent<ProjectileScript>().targetLoc = _abilityTargetDir;
-        _temp.GetComponent<ProjectileScript>().projSpeed = _ability.abilitySpeed;
-        _temp.GetComponent<ProjectileScript>().projDamage = _ability.abilityBaseDamage + heroClass.heroAbilityDmg * _ability.abilityScaling;
-        _temp.GetComponent<ProjectileScript>().projAbilityTypeString = _ability.typeOfAbilityCast.ToString();
-        _temp.GetComponent<ProjectileScript>().projDamageType = ProjectileScript.ProjDamageType.Ability;
-        _temp.GetComponent<ProjectileScript>().projCreator = gameObject;
-        _temp.GetComponent<ProjectileScript>().projRange = _ability.abilityRangeNum / 14f; // FIXME // WHEN PROJ OUT OF RANGE, DESTROY
-        _temp.GetComponent<ProjectileScript>().projTargeted = _targeted;
+        GameObject _temp = Instantiate(_prefab, _abilitySpawn, Quaternion.Euler(-90, 0, transform.rotation.z));
+        if (_ability == heroClass.Q_Ability)
+        {
+            Rigidbody rb = _temp.GetComponent<Rigidbody>();
+            //rb.AddRelativeForce(transform.forward * _ability.abilitySpeed, ForceMode.Impulse);
+            rb.AddRelativeForce(_abilityTargetDir * _ability.abilitySpeed);
+            _temp.GetComponent<ProjectileScript>().target = targetPos;
+            _temp.GetComponent<ProjectileScript>().targetLoc = _abilityTargetDir;
+            _temp.GetComponent<ProjectileScript>().projSpeed = _ability.abilitySpeed;
+            _temp.GetComponent<ProjectileScript>().projDamage = _ability.abilityBaseDamage + heroClass.heroAbilityDmg * _ability.abilityScaling;
+            _temp.GetComponent<ProjectileScript>().projAbilityTypeString = _ability.typeOfAbilityCast.ToString();
+            _temp.GetComponent<ProjectileScript>().projDamageType = ProjectileScript.ProjDamageType.Ability;
+            _temp.GetComponent<ProjectileScript>().projCreator = gameObject;
+            _temp.GetComponent<ProjectileScript>().projRange = _ability.abilityRangeNum / 14f; // FIXME // WHEN PROJ OUT OF RANGE, DESTROY
+            _temp.GetComponent<ProjectileScript>().projTargeted = _targeted;
+        }
+        else
+        {
+            Rigidbody rb = _temp.GetComponent<Rigidbody>();
+            //rb.AddRelativeForce(transform.forward * _ability.abilitySpeed, ForceMode.Impulse);
+            rb.AddRelativeForce(transform.forward * _ability.abilitySpeed);
+            _temp.GetComponent<ProjectileScript>().target = targetPos;
+            _temp.GetComponent<ProjectileScript>().targetLoc = _abilityTargetDir;
+            _temp.GetComponent<ProjectileScript>().projSpeed = _ability.abilitySpeed;
+            _temp.GetComponent<ProjectileScript>().projDamage = _ability.abilityBaseDamage + heroClass.heroAbilityDmg * _ability.abilityScaling;
+            _temp.GetComponent<ProjectileScript>().projAbilityTypeString = _ability.typeOfAbilityCast.ToString();
+            _temp.GetComponent<ProjectileScript>().projDamageType = ProjectileScript.ProjDamageType.Ability;
+            _temp.GetComponent<ProjectileScript>().projCreator = gameObject;
+            _temp.GetComponent<ProjectileScript>().projRange = _ability.abilityRangeNum / 14f; // FIXME // WHEN PROJ OUT OF RANGE, DESTROY
+            _temp.GetComponent<ProjectileScript>().projTargeted = _targeted;
+        }
     }
 
     void CastAbilityOnceInRange(AbilityClass _currentAbility, float _range) // TODO - make it so that it is more universal
@@ -349,7 +377,7 @@ public class Ekard_AbilityTracker : MonoBehaviour
             }
         }
     }
-    [SerializeField] bool W_Ability_IsReturn=false;
+    [SerializeField] bool E_Ability_IsReturn = false;
     void CheckLearnAbility()
     {
         if (Input.GetKey(KeyCode.LeftShift))
@@ -438,43 +466,47 @@ public class Ekard_AbilityTracker : MonoBehaviour
             else // E Ability
             if (Input.GetKeyUp(E_Ability_Keycode))
             {
-                // Check if hero has skill points to use
-                if (heroClass.heroSkillPoints == 0)
+                if (E_Ability_IsReturn) { return; }
+                else
                 {
-                    systemScript.AlertObservers("No available skill points!");
-                    return;
-                }
+                    // Check if hero has skill points to use
+                    if (heroClass.heroSkillPoints == 0)
+                    {
+                        systemScript.AlertObservers("No available skill points!");
+                        return;
+                    }
 
-                // Check if ability is already max level
-                if (heroClass.heroSkillPoints != 0 && heroClass.E_Ability.abilityLevel == heroClass.E_Ability.abilityMaxLevel)
-                {
-                    systemScript.AlertObservers("Ability is max level!");
-                    return;
-                }
+                    // Check if ability is already max level
+                    if (heroClass.heroSkillPoints != 0 && heroClass.E_Ability.abilityLevel == heroClass.E_Ability.abilityMaxLevel)
+                    {
+                        systemScript.AlertObservers("Ability is max level!");
+                        return;
+                    }
 
-                // Unlock HUD Icon if not leveled
-                if (heroClass.E_Ability.abilityLevel == 0)
-                    heroClass.E_Ability.HUDIcon.fillAmount = 0;
+                    // Unlock HUD Icon if not leveled
+                    //if (heroClass.E_Ability.abilityLevel == 0)
+                    //    heroClass.E_Ability.HUDIcon.fillAmount = 0;
 
-                // Level up ability and reduce skill points
-                heroClass.E_Ability.abilityLevel += 1;
-                heroClass.heroSkillPoints -= 1;
-                abilityHUDVisual.LevelAbilityHUD("E", 1);
+                    // Level up ability and reduce skill points
+                    heroClass.E_Ability.abilityLevel += 1;
+                    heroClass.heroSkillPoints -= 1;
+                    abilityHUDVisual.LevelAbilityHUD("E", 1);
 
-                // Upgrade ability stats
-                heroClass.GetUpdatedStats_Ekard(heroClass.E_Ability, true);
+                    // Upgrade ability stats
+                    heroClass.GetUpdatedStats_Ekard(heroClass.E_Ability, true);
 
-                // Check if ability is max level but skillpoints remain
-                if (heroClass.E_Ability.abilityLevel == heroClass.E_Ability.abilityMaxLevel)
-                {
-                    systemScript.AlertObservers("Available skill points but E is maxed");
-                }
+                    // Check if ability is max level but skillpoints remain
+                    if (heroClass.E_Ability.abilityLevel == heroClass.E_Ability.abilityMaxLevel)
+                    {
+                        systemScript.AlertObservers("Available skill points but E is maxed");
+                    }
 
-                // Update HUD to show no more skillpoints
-                if (heroClass.heroSkillPoints == 0)
-                {
-                    systemScript.AlertObservers("No available skill points! (No Popup)");
-                    return;
+                    // Update HUD to show no more skillpoints
+                    if (heroClass.heroSkillPoints == 0)
+                    {
+                        systemScript.AlertObservers("No available skill points! (No Popup)");
+                        return;
+                    }
                 }
             }
             else // R Ability
@@ -618,7 +650,7 @@ public class Ekard_AbilityTracker : MonoBehaviour
                 heroCombat.CallAbilityCast(0.5f);
                 heroCombat.ResetAutoAttack(false);
 
-                CreateAbility(heroClass.Q_Ability, Q_Projectile, Q_Ability_Spawn.transform.position, null, Vector3.zero, false);
+                CreateAbility(heroClass.Q_Ability, Q_Projectile, Q_Ability_Spawn.transform.position, null,relativePos, false);
                 //CreateAbility(heroClass.W_Ability, W_Projectile, W_Ability_Spawn.transform.position, null, Vector3.zero, false);
                 heroClass.heroMana -= heroClass.Q_Ability.abilityCost;
 

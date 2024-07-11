@@ -1178,9 +1178,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyAttackType: 0
   targetedEnemy: {fileID: 0}
-  enemyAttackRange: 0
+  enemyAttackRange: 4
   enemyRotateSpeedForAttack: 0
-  enemyAggroRange: 0
+  enemyAggroRange: 4
   attackRange_Indicator: {fileID: 0}
   attackRange_Canvas: {fileID: 4469809741215241025}
   checkAttackRange: 0

@@ -13714,7 +13714,7 @@ MonoBehaviour:
   _space_target: {fileID: 16242825344222533}
   MyParent: {fileID: 0}
   W_Ability_Canvas: {fileID: 0}
-  W_Ability_IsReturn: 1
+  E_Ability_IsReturn: 1
 --- !u!114 &2780260893463712441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13730,7 +13730,7 @@ MonoBehaviour:
   heroAttackType: 0
   targetedEnemy: {fileID: 0}
   targetedObjectInteract: {fileID: 0}
-  heroAttackRange: 3
+  heroAttackRange: 7.5
   heroRotateSpeedForAttack: 0.075
   moveToEnemy: 0
   prevEnemyRef: {fileID: 0}

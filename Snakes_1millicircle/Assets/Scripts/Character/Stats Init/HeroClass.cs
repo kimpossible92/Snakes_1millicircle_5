@@ -100,6 +100,10 @@ public class HeroClass : MonoBehaviourPun, IPunObservable
     {
         return heroHealth <= 0;
     }
+    public void setMaxHealth()
+    {
+        heroHealth = heroMaxHealth;
+    }
     HeroClass()
     {
         heroLevel = 1;
@@ -441,7 +445,7 @@ public class HeroClass : MonoBehaviourPun, IPunObservable
         Q_Ability.abilityDuration = 0f;
         Q_Ability.abilityBuffPercentage = 0f;
 
-        Q_Ability.abilitySpeed = 600f; // average speed
+        Q_Ability.abilitySpeed = 420f; // average speed
         Q_Ability.abilityCastTime = 0f;
 
         Q_Ability.abilityBaseDamage = 60f;
